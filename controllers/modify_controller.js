@@ -1,27 +1,45 @@
 const toRegister = require('../models/register_model');
+const Check = require('../service/member_check');
+const encryption = require('../models/encryption');
+
+let check = new Check();
 
 module.exports = class Member {
     postRegister(req, res, next){
+
+        const password = encryption(req.body.password);
+
         //get client's data
         const memberData = {
             name: req.body.name,
             email: req.body.email,
-            password: req.body.password,
+            password: password,
             create_date: onTime()
         }
-        //store data into DB
-        toRegister(memberData).then(result => {
-            // if successful
+
+        const checkEmail = check.checkEmail(memberData.email);
+        if(checkEmail == false) {
             res.json({
-                status: '註冊成功',
-                result: result
+                result: {
+                    status: '註冊失敗。',
+                    err: '請輸入正確的Email格式'
+                }
             })
-        }, (err) => {
-            // if error
-            res.json({
-                result: err
+        } else if (checkEmail == true) {
+            //store data into DB
+            toRegister(memberData).then(result => {
+                // if successful
+                res.json({
+                    status: '註冊成功',
+                    result: result
+                })
+            }, (err) => {
+                // if error
+                res.json({
+                    result: err
+                })
             })
-        })
+        }
     }
 }
 

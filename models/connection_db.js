@@ -6,10 +6,6 @@ const connection = mysqlt.createConnection({
     user: config.mysql.user,
     password: config.mysql.password,
     database: config.mysql.database
-    // host: 'localhost',
-    // user: 'testing',
-    // password: '123',
-    // database: 'member'
 });
 
 connection.connect(err => {

@@ -2,18 +2,36 @@ const db = require('./connection_db');
 
 module.exports = function register(memberData) {
     let result = {};
+
     return new Promise((resolve, reject) => {
-        // sotre data into DB
-        db.query('INSERT INTO member_info SET ?', memberData, function(err, rows) {
+        //尋找是否有重複的email
+        db.query('select email from member_info where email = ?', memberData.email, function(err, rows) {
             if(err) {
                 console.log(err);
                 result.status = '註冊失敗。';
-                result.err = '伺服器錯誤，請稍候在試！';
+                result.err = '伺服器錯誤，請稍後再試！';
                 reject(result);
                 return;
             }
-            result.registerMember = memberData;
-            resolve(result);
+            //如果有重複的email
+            if(rows.length >= 1) {
+                console.log('這裡印出rows是啥', rows);
+                result.status = '註冊失敗。';
+                result.err = '已經有重複的email!';
+                reject(result);
+            } else {
+                db.query('INSERT INTO member_info SET ?', memberData, function(err, rows) {
+                    if(err) {
+                        console.log(err);
+                        result.status = '註冊失敗。';
+                        result.err = '伺服器錯誤，請稍候在試！';
+                        reject(result);
+                        return;
+                    }
+                    result.registerMember = memberData;
+                    resolve(result);
+                })
+            }
         })
     })
 }
