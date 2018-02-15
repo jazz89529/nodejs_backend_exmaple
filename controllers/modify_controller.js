@@ -1,6 +1,8 @@
+const jwt = require('jsonwebtoken');
 const toRegister = require('../models/register_model');
 const Check = require('../service/member_check');
 const encryption = require('../models/encryption');
+const loginAction = require('../models/login_model');
 
 let check = new Check();
 
@@ -41,7 +43,47 @@ module.exports = class Member {
             })
         }
     }
+
+    postLogin(req, res, next) {
+
+        const password = encryption(req.body.password);
+
+        //get client's data
+        const memberData = {
+            email: req.body.email,
+            password: password,
+        }
+
+        loginAction(memberData).then(rows => {
+            if(check.checkNull(rows) === true) {
+                res.json({
+                    result: {
+                        status: '登入失敗。',
+                        err: '請輸入正確的帳號或密碼。'
+                    }
+                })
+            }else if(check.checkNull(rows) === false) {
+                //產生Token
+                const token = jwt.sign({
+                    algorithm: 'HS256',
+                    exp: Math.floor(Date.now() / 1000) + (60 * 60),//Token設為一個小時
+                    data: rows[0].id
+                }, 'secret');
+
+                res.setHeader('token', token);
+                res.json({
+                    result: {
+                        status: '登入成功。',
+                        loginMember: '歡迎' + rows[0].name + ' 的登入'
+                    }
+                })
+            }
+        })
+    }
 }
+
+
+
 
 
 const onTime = () => {

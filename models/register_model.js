@@ -15,7 +15,6 @@ module.exports = function register(memberData) {
             }
             //如果有重複的email
             if(rows.length >= 1) {
-                console.log('這裡印出rows是啥', rows);
                 result.status = '註冊失敗。';
                 result.err = '已經有重複的email!';
                 reject(result);
