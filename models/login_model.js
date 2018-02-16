@@ -10,7 +10,6 @@ module.exports = function memberLogin(memberData) {
                 reject(result);
                 return;
             }
-            console.log(rows);
             resolve(rows);
 
         })

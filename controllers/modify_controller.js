@@ -3,6 +3,8 @@ const toRegister = require('../models/register_model');
 const Check = require('../service/member_check');
 const encryption = require('../models/encryption');
 const loginAction = require('../models/login_model');
+const verify = require('../models/verification_model');
+const updateAction = require('../models/update_model');
 
 let check = new Check();
 
@@ -79,6 +81,45 @@ module.exports = class Member {
                 })
             }
         })
+    }
+
+    putUpdate(req, res, next) {
+        const token = req.headers['token'];
+        //確定token是否有輸入
+        if(check.checkNull(token) === true) {
+            res.json({
+                err: '請輸入token'
+            })
+        } else if(check.checkNull(token) === false) {
+            verify(token).then(tokenResult => {
+                if(tokenResult === false) {
+                    res.json({
+                        result: {
+                            status: 'token錯誤。',
+                            err: '請重新登入。'
+                        }
+                    })
+                } else {
+                    const id = tokenResult;
+                    //進行加密
+                    const password = encryption(req.body.password);
+                    const memberUpdateData = {
+                        name: req.body.name,
+                        password: password,
+                        update_date: onTime()
+                    }
+                    updateAction(id, memberUpdateData).then(result => {
+                        res.json({
+                            result: result
+                        })
+                    }, (err) => {
+                        res.json({
+                            result: err
+                        })
+                    })
+                }
+            })
+        }
     }
 }
 
