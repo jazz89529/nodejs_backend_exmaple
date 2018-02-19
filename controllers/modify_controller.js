@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
-const toRegister = require('../models/register_model');
+const formidable = require('formidable');
+const fs = require('fs');
+const registerAction = require('../models/register_model');
 const Check = require('../service/member_check');
 const encryption = require('../models/encryption');
 const loginAction = require('../models/login_model');
@@ -31,7 +33,7 @@ module.exports = class Member {
             })
         } else if (checkEmail == true) {
             //store data into DB
-            toRegister(memberData).then(result => {
+            registerAction(memberData).then(result => {
                 // if successful
                 res.json({
                     status: '註冊成功',
@@ -121,6 +123,74 @@ module.exports = class Member {
             })
         }
     }
+
+    putUpdateImg(req, res, next) {
+        const form = new formidable.IncomingForm();
+
+        const token = req.headers['token'];
+        if(check.checkNull(token) === true) {
+            res.json({
+                err: '請輸入token。'
+            })
+        } else if (check.checkNull(token) === false) {
+            verify(token).then(tokenResult => {
+                if(tokenResult === false) {
+                    res.json({
+                        result: {
+                            status: 'token錯誤。',
+                            err: '請重新登入'
+                        }
+                    })
+                } else {
+                    form.parse(req, async function(err, fields, files) {
+                        if(check.checkFileSize(files.file.size) === true) {
+                            res.json({
+                                result: {
+                                    status: "上傳檔案失敗。",
+                                    err: '請上傳小於1MB的檔案。'
+                                }
+                            })
+                            return;
+                        }
+                        if(check.checkFileType(files.file.type) === true) {
+                            const image = await fileToBase64(files.file.path);
+                            const id = tokenResult;
+                            const password = encryption(fields.password);
+
+                            const memberUpdateData = {
+                                img: image,
+                                name: fields.name,
+                                password: password,
+                                update_date: onTime()
+                            }
+
+                            updateAction(id, memberUpdateData).then(result => {
+                                res.json({
+                                    result: result,
+                                })
+                            }, (err) => {
+                                res.json({
+                                    result: err
+                                })
+                            })
+
+                        } else {
+                            res.json({
+                                result: {
+                                    status: "上傳檔案失敗。",
+                                    err: '請選擇正確的檔案格式，例如jpg, jpeg, png等。'
+                                }
+                            })
+                            return;
+                        }
+                    })
+                }
+
+            })
+        }
+
+
+    }
 }
 
 
@@ -142,4 +212,12 @@ const onTime = () => {
     (mi > 9 ? '' : '0') + mi, '-' +
     (ss > 9 ? '' : '0') + ss
     ].join('');
+}
+
+const fileToBase64 = (filePath) => {
+    return new Promise((resolve, reject) => {
+        fs.readFile(filePath, 'base64', function(err, data) {
+            resolve(data);
+        })
+    })
 }

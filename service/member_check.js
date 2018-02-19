@@ -13,4 +13,17 @@ module.exports = class CheckCustomer {
         //為空
         return true;
     }
+    checkFileSize(fileSize) {
+        let maxSize = 1 * 1024 * 1024; // 1MB
+        if(fileSize > maxSize) {
+            return true;
+        }
+        return false;
+    }
+    checkFileType(fileType) {
+        if(fileType === 'image/png' || fileType === 'image/jpg' || fileType === 'image/jpeg') {
+            return true;
+        }
+        return false;
+    }
 }

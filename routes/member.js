@@ -6,11 +6,13 @@ const MemberModifyMethod = require('../controllers/modify_controller');
 memberModifyMethod = new MemberModifyMethod();
 
 /* GET home page. */
-router.post('/register', memberModifyMethod.postRegister);
+router.post('/member', memberModifyMethod.postRegister); //註冊新會員
 
-router.post('/login', memberModifyMethod.postLogin);
+router.post('/member/login', memberModifyMethod.postLogin); //會員登入
 
-router.put('/update', memberModifyMethod.putUpdate);
+router.put('/member', memberModifyMethod.putUpdate); //更新會員資料
+
+router.put('/updateimg', memberModifyMethod.putUpdateImg); //更新會員資料(e.g. image)
 
 
 module.exports = router;
