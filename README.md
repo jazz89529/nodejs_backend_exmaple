@@ -22,7 +22,7 @@ ps. headers 有token哦
 
 * HTTP Method: PUT
 * URL:http://localhost:3000/member
-# Headers:
+* Headers:
   * Content-Type: application/x-www-form-urlencoded
   * token: 貼上剛剛登入取得的token
 * Body(x-www-form-urlencoded):
@@ -33,7 +33,7 @@ ps. headers 有token哦
 
 * HTTP Method: PUT
 * URL:http://localhost:3000/updateimg
-# Headers:
+* Headers:
   * Content-Type: application/form-data
 * Body(form-data):
   * name: test123123
